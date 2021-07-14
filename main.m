@@ -16,12 +16,18 @@
 path = '~/Documents/Uni/FYRP/';
 cd(path);
 
-addpath([path 'data'], genpath([path 'synth_data']), ...
+addpath([path 'data'], ... 
+    genpath([path 'synth_data']), ...
     genpath([path 'hierarchical_gibbs']), ...
     [path 'eeglab2021.0']);
 
+% A number will automatically be appended to this path to be able to
+% discern between different runs with the same savePath (e.g. 'data/run'
+% will become 'data/run_1', after that 'data/run_2', etc.)
+savePath = [path 'data/run_fixed_known'];
+
 load('varForBumps135_100.mat');
-load('assoc_recog_overall_SNR5_lockedPos.mat');
+load('assoc_recog_overall_SNR5.mat');
 load('chanlocs.mat');
 
 x = all_x;
@@ -39,17 +45,18 @@ close % the EEGlab figure
 
 %% Setting up variables
 
+max_iter = 20000;
+
 % Which condition to sample for.
-cond = 2;
-pos = all_pos(conds == cond, :);
+cond = 1;
 
 % Number of bumps, so there are n+1 flats.
 n = 5;
 % A normalising variable from Anderson et al. (2016)
 V = 5;
 
-% N = length(unique(subjects));
-N = 2;
+N = length(unique(subjects));
+% N = 2;
 D = size(normedscore10, 2);
 
 % Bump topology - 1 by 5 matrix
@@ -90,31 +97,38 @@ mu_dks = zeros(D, n); % Principal component box
 tau2_dks = ones(D, n); % Principal component box
 m_idks = zeros(N, D, n);
 
-%% Calculating true t_is
+%% Setting up parameter histogram variables
 
-true_n = size(all_pos, 2);
-num_trials = length(x);
-
-true_bump_ends = zeros(num_trials, true_n+1);
-true_bump_ends(:, 2:end) = all_pos + 4;
-true_bump_starts = zeros(num_trials, true_n+1) + trial_lens + 1;
-true_bump_starts(:, 1:true_n) = all_pos;
-true_t_is = true_bump_starts - true_bump_ends - 1; % In number of samples
-
-total_flat_lens = trial_lens - true_n * 5;
-true_t_is = true_t_is ./ repmat(total_flat_lens, 1, true_n + 1);
-true_t_is = mean(true_t_is, 1); % In average proportions
+alpha_k_hist = zeros(max_iter, n+1);
+beta_k_hist = zeros(max_iter, n+1);
+alpha_ik_hist = zeros(max_iter, N, n+1);
+t_i_hist = zeros(max_iter, N, n+1);
+m_idk_hist = zeros(max_iter, N, D, n);
+mu_dk_hist = zeros(max_iter, D, n);
+tau2_dk_hist = zeros(max_iter, D, n);
 
 %% Sampling
 
-max_iter = 20000;
+tic
 
 for iter = 1:max_iter
     disp(iter)
+    
+    % Record parameter values into histograms variables
+    alpha_k_hist(iter, :) = alpha_ks;
+    beta_k_hist(iter, :) = beta_ks;
+    alpha_ik_hist(iter, :, :) = alpha_iks;
+    t_i_hist(iter, :, :) = t_is;
+    m_idk_hist(iter, :, :, :) = m_idks;
+    mu_dk_hist(iter, :, :) = mu_dks;
+    tau2_dk_hist(iter, :, :) = tau2_dks;
+    
+    % Visualize results
     visualize(max_iter, iter, ... 
         normedscore10, x, y, subjects, ... 
         coeff10, latent10, data, chanlocs, ...
-        alpha_ks, beta_ks, alpha_iks, t_is, mu_dks, tau2_dks, m_idks);
+        alpha_k_hist, beta_k_hist, alpha_ik_hist, t_i_hist, ... 
+        mu_dk_hist, tau2_dk_hist, m_idk_hist);
     
     disp('Sampling flat box...')
     for k = 1:n+1
@@ -136,7 +150,6 @@ for iter = 1:max_iter
             normedscore10, t_is(i, :), alpha_iks(i, :), V, ... 
             x(subjects == i & conds == cond), ... 
             y(subjects == i & conds == cond), n, 1);
-%         t_is(i, :) = true_t_is;
     end
     
     disp('Sampling bump box...')
@@ -165,19 +178,16 @@ for iter = 1:max_iter
                 
                 % C: Number of trials
                 C = length(subject_x);
-
-%                 bump_starts = repmat(pos(1, k), C, 1);
-%                 
-%                 % To index into the entire data array, we need to offset
-%                 % the bump locations by every trial's onset.
-%                 bump_starts = subject_x + bump_starts - 1; % C by 1
-%                 
-%                 % Determine bump indices, reshape into column vector.
-%                 bump_indices = repmat(bump_starts, 1, 5) + (0:4);
-%                 bump_indices = reshape(bump_indices', [], 1);
                 
+                % Due to rounding errors, it is possible that the bump
+                % indices extend just beyond the data array boundaries;
+                % correct for that by padding.
+                bump_indices = bump_indices(bump_indices < length(normedscore10));
+                pad_size = length(P) * C - length(bump_indices);
+
                 % Get those data!
                 bumps = normedscore10(bump_indices, d);
+                bumps = padarray(bumps, [pad_size 0], 'post');
                 
                 bump_corr = repmat(P, 1, C) * bumps;
                 
@@ -190,3 +200,41 @@ for iter = 1:max_iter
         end
     end
 end
+
+toc
+
+%% Save histogram variables to file
+
+% Determine which number to append to the save directory
+dirs = regexp(savePath, filesep, 'split');
+parentDir = fullfile(dirs{1:end-1});
+saveDir = dirs{end};
+
+pattern = ['^' saveDir '_?([0-9]+)?$'];
+
+parentDirItems = dir(parentDir);
+
+maxSaveDirNum = 0;
+for i = 1:length(parentDirItems)
+    token = regexp(parentDirItems(i).name, pattern, 'tokens');
+    if ~isempty(token)
+        saveDirNumber = str2double(token{1, 1});
+        if ~isnan(saveDirNumber)
+            maxSaveDirNum = max(saveDirNumber, maxSaveDirNum);
+        end
+    end
+end
+
+saveDir = [saveDir '_' num2str(maxSaveDirNum + 1)];
+
+savePath = fullfile(parentDir, saveDir);
+mkdir(savePath);
+
+save(fullfile(savePath, 'histograms'), ... 
+    'alpha_k_hist', ...
+    'beta_k_hist', ...
+    'alpha_ik_hist', ...
+    't_i_hist', ...
+    'm_idk_hist', ...
+    'mu_dk_hist', ...
+    'tau2_dk_hist');

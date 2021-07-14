@@ -1,6 +1,11 @@
 function samples = tiMH(data, t_is, alphas, V, x, y, numBumps, n)
-%TIMH Summary of this function goes here
-%   Detailed explanation goes here
+%TIMH Samples the vector t_i.
+%   A Metropolis sampler for t_i by transformation. t_i is subject to the
+%   constraint that all its elements must sum to 1, therefore it is easier
+%   to first transform t_i to a different sample space where this
+%   constraint is applied automatically. For details, see
+%   https://arxiv.org/abs/1010.3436. Has a burn-in of 50 samples and a lag
+%   of 10 samples to prevent autocorrelation.
     
     % Sum all the PCs together
     data = sum(data, 2);
@@ -85,7 +90,10 @@ function samples = tiMH(data, t_is, alphas, V, x, y, numBumps, n)
             t_is = t_is_prop;
         end
 
+        % Move on to the next dimension
         k = k + 1;
+        
+        % If we have arrived at the last dimension, do some administration
         if k == length(t_is)
             t_is(k) = 1 - sum(t_is(1:end-1));
 
