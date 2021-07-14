@@ -12,10 +12,6 @@ function visualize(max_iter, iter, ...
     burnIn = 1000;
     renderLag = 1000;
     thinLag = 20;
-
-%     burnIn = 0;
-%     renderLag = 1;
-%     thinLag = 1;
     
     % Recorded samples to display
     displaySelection = burnIn+1:thinLag:iter;
