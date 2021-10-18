@@ -2,7 +2,7 @@
 
 This sampler will estimate the parameter values for the hierarchy displayed in the figure below from EEG data.
 
-![parameter hierarchy](graphical_model_2.png)
+![parameter hierarchy](Graphical\ models/graphical_model_2.png)
 
 ## Requirements
 

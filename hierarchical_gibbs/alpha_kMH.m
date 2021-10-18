@@ -1,4 +1,4 @@
-function samples = alpha_kMH(start, a_k, b_k, q_k, alpha_iks, beta_k, n)
+function samples = alpha_kMH(start, c_k, d_k, e_k, sigma2_iks, beta_k, n)
 %ALPHA_KMH Creates n samples for alpha_k.
 %   A Metropolis sampler for alpha_k. Has a burn-in period of 10 samples
 %   and and additional lag of 10 samples to thin the chain. Uses a normal
@@ -18,7 +18,7 @@ function samples = alpha_kMH(start, a_k, b_k, q_k, alpha_iks, beta_k, n)
     % Variance of proposal distribution
     proposal_variance = 2;
     
-    product = prod(alpha_iks);
+    product = prod(sigma2_iks);
 
     while true
         xProposed = normrnd(xPrevious, proposal_variance, 1);
@@ -28,8 +28,8 @@ function samples = alpha_kMH(start, a_k, b_k, q_k, alpha_iks, beta_k, n)
             continue % Try again
         end
         
-        acceptance = alpha_kPdf(xProposed, a_k, b_k, q_k, alpha_iks, beta_k, product) ... 
-            / alpha_kPdf(xPrevious, a_k, b_k, q_k, alpha_iks, beta_k, product);
+        acceptance = alpha_kPdf(xProposed, c_k, d_k, e_k, sigma2_iks, beta_k, product) ... 
+            / alpha_kPdf(xPrevious, c_k, d_k, e_k, sigma2_iks, beta_k, product);
         % Correcting for the truncated proposal distribution
         % See https://darrenjw.wordpress.com/2012/06/04/metropolis-hastings-mcmc-when-the-proposal-and-target-have-differing-support/
         acceptance = acceptance * normcdf(xPrevious/sqrt(proposal_variance)) ...
