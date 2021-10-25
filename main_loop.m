@@ -12,6 +12,5 @@ end
 
 parfor i = 1:length(settings)
     s = settings(i);
-    disp(s.parameters.n)
-%     main(s.path, s.save_dir, s.dataset, s.visualize_flag, s.parameters);
+    main(s.path, s.save_dir, s.dataset, s.visualize_flag, s.parameters);
 end
