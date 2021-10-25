@@ -1,3 +1,4 @@
+function [] = main(path, save_dir, dataset, visualize_flag, parameters)
 % Gibbs sampler for discovering cognitive stages in EEG data
 
 % There are many variables that need to be sampled in turn:
@@ -11,9 +12,26 @@
 %   bump and every principal component. Additionally, sample m_idk for
 %   every subject.
 
+arguments
+    path char = '~/Documents/Uni/FYRP/'
+    save_dir char = 'data/run2_debug_path-stuffs'
+    dataset string = ""
+    visualize_flag logical = true
+    parameters struct = struct
+end
+
+%% Checking validity of and setting defaults for PARAMETERS
+
+if ~isfield(parameters, 'n')
+    parameters.n = 5; % Number of bumps
+end
+
+if ~isfield(parameters, 'N')
+    parameters.N = 2; % Number of subjects
+end
+
 %% Loading data
 
-path = '~/Documents/Uni/FYRP/';
 cd(path);
 
 addpath(genpath([path 'data']), ... 
@@ -24,17 +42,20 @@ addpath(genpath([path 'data']), ...
 % A number will automatically be appended to this path to be able to
 % discern between different runs with the same savePath (e.g. 'data/run'
 % will become 'data/run_1', after that 'data/run_2', etc.)
-savePath = [path 'data/run2_debug_jumping_bumps'];
+savePath = [path save_dir];
 
-load('varForBumps135_100.mat');
-load('assoc_recog_overall_SNR10_lockedPos.mat');
-load('chanlocs.mat');
+load varForBumps135_100.mat coeff10 latent10 conds data normedscore10 subjects x y
+load chanlocs.mat chanlocs
 
-x = all_x;
-y = all_y;
-subjects = all_subjects;
-conds = all_conds;
-normedscore10 = all_signal;
+if ~(dataset == "")
+    load(dataset, 'all_x', 'all_y', 'all_subjects', 'all_conds', 'all_signal')
+    
+    x = all_x;
+    y = all_y;
+    subjects = all_subjects;
+    conds = all_conds;
+    normedscore10 = all_signal;
+end
 
 trial_lens = y - x + 1;
 
@@ -43,8 +64,10 @@ trial_lens = y - x + 1;
 
 %% Setting up EEGlab
 
-eeglab;
-close % the EEGlab figure
+if visualize_flag
+    eeglab;
+    close % the EEGlab figure
+end
 
 %% Setting up variables
 
@@ -54,12 +77,12 @@ max_iter = 20000;
 cond = 1;
 
 % Number of bumps, so there are n+1 flats.
-n = 5;
+n = parameters.n;
 % A normalising variable from Anderson et al. (2016)
 V = 5;
 
 % N = length(unique(subjects));
-N = 4;
+N = parameters.N;
 D = size(normedscore10, 2);
 
 % Bump topology - 1 by 5 matrix
@@ -78,7 +101,7 @@ n_ks = ((1:n) * (mean(trial_lens) / (n + 1)))'; % Even spread of bumps as prior
 s2_k = 100;
 % upsilon2_k prior (inverse gamma)
 a_k = 1;
-b_k = 100;
+b_k = 10;
 % alpha_k prior (non-closed form)
 c_k = 50;
 d_k = 0.5;
@@ -107,7 +130,7 @@ nu_iks = repmat(xi_ks', N, 1);
 sigma2_iks = repmat(upsilon2_ks', N, 1);
 
 % Be careful with p_itks: Subjects have different numbers of trials
-trial_nums = histcounts(categorical(subjects)); % TODO: check that this is ordered according to subjects
+trial_nums = histcounts(categorical(subjects(conds == cond))); % TODO: check that this is ordered according to subjects
 p_itks = zeros(N, max(trial_nums), n);
 
 for i = 1:N
@@ -151,7 +174,7 @@ else
     hists.mu_dk = zeros(max_iter, D, n);
     hists.tau2_dk = zeros(max_iter, D, n);
 
-    hists.p = zeros(max_iter, n);
+    hists.p_itk = zeros(max_iter, N, max(trial_nums), n);
 end
 
 %% Overwriting sampling variables if continuing a previous run
@@ -197,13 +220,15 @@ for iter = start_iter:max_iter
     hists.mu_dk(iter, :, :) = mu_dks;
     hists.tau2_dk(iter, :, :) = tau2_dks;
     
-    hists.p(iter, :) = p_itks(1, 1, :);
+    hists.p_itk(iter, :, :, :) = p_itks;
     
     % Visualize results
-    visualize(max_iter, iter, start_iter,... 
-        normedscore10, x, y, subjects, ... 
-        coeff10, latent10, data, chanlocs, ...
-        hists);
+    if visualize_flag
+        visualize(max_iter, iter, start_iter,... 
+            normedscore10, x, y, subjects, ... 
+            coeff10, latent10, data, chanlocs, ...
+            hists);
+    end
     
     disp('Sampling left branch...')
     for k = 1:n
@@ -308,7 +333,11 @@ toc
 
 % Determine which number to append to the save directory
 dirs = regexp(savePath, filesep, 'split');
-parentDir = fullfile(dirs{1:end-1});
+prefix = '';
+if dirs{1} == ""
+    prefix = '/'; % savePath is absolute
+end
+parentDir = [prefix fullfile(dirs{1:end-1})];
 saveDir = dirs{end};
 
 pattern = ['^' saveDir '_?([0-9]+)?$'];
@@ -333,3 +362,5 @@ savePath = fullfile(parentDir, saveDir);
 mkdir(savePath);
 
 save(fullfile(savePath, 'histograms'), 'hists');
+
+end

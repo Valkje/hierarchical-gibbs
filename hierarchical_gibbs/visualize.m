@@ -175,7 +175,8 @@ function visualize(max_iter, iter, start_iter,...
     set(0, 'CurrentFigure', h(10));
     clf(gcf)
 
-    nsubj = 2;
+%     nsubj = 2;
+    nsubj = size(hists.m_idk, 2);
 
 %         bump_positions = cumsum(squeeze(t_i_hist(iter, :, :)), 2);
 
@@ -195,7 +196,7 @@ function visualize(max_iter, iter, start_iter,...
     clf(gcf)
     for k = 1:n
         subplot(2, round(n/2), k)
-        histogram(hists.p(displaySelection, k))
+        histogram(hists.p_itk(displaySelection, 1, 1, k))
         title(['p_{itk}, i=1, t=1, k=' num2str(k)])
         set(gca, 'FontSize', 14)
     end

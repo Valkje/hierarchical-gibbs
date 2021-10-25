@@ -1,17 +1,17 @@
 %% Topoplotting mu_dks (sampled vs true)
 
-handle = figure(10);
+handle = figure(30);
 clf
 
 cond = 1;
 
 if cond == 1
-    load('data/run_cond1_1/histograms.mat');
+    load('data/run2_debug_jumping_bumps_1/histograms.mat');
 else
     load('data/run_cond2_1/histograms.mat');
 end
 
-mu_dks = squeeze(mu_dk_hist(end, :, :));
+mu_dks = squeeze(hists.mu_dk(end, :, :));
 
 annotation('textbox', [.0, .5, .5, .5], 'String', ['Sampled average Fan ' num2str(cond) ' bump topologies'], 'EdgeColor', 'None', 'FontSize', 22)
 
@@ -49,7 +49,7 @@ set(handle, 'PaperPositionMode', 'Auto', 'PaperUnits', 'Inches',...
     'PaperSize', [pos(3), pos(4)])
 
 saveFile = fullfile('images', ['sampled_true_bumps_cond' num2str(cond)]);
-print(handle, saveFile, '-dpdf', '-r0');
+% print(handle, saveFile, '-dpdf', '-r0');
 
 %% Creating sampled and true stacked bar graph
 
