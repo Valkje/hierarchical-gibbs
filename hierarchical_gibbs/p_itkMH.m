@@ -15,7 +15,7 @@ function samples = p_itkMH(params)
     V = params.V;
     num = params.num;
 
-    burnIn = 10;
+    burnIn = 20;
     lag = 0;
     skipCounter = burnIn + lag;
     
@@ -35,8 +35,8 @@ function samples = p_itkMH(params)
             continue % Try again
         end
         
-        acceptance = p_itkPdf2(xProposed,  i, t, k, data, m_idks, p_itks, nu_iks, sigma2_iks, P, V) ... 
-            / p_itkPdf2(xPrevious,  i, t, k, data, m_idks, p_itks, nu_iks, sigma2_iks, P, V);
+        acceptance = p_itkPdf(xProposed,  i, t, k, data, m_idks, p_itks, nu_iks, sigma2_iks, P, V) ... 
+            / p_itkPdf(xPrevious,  i, t, k, data, m_idks, p_itks, nu_iks, sigma2_iks, P, V);
         % Correcting for the truncated proposal distribution
         % See https://darrenjw.wordpress.com/2012/06/04/metropolis-hastings-mcmc-when-the-proposal-and-target-have-differing-support/
         acceptance = acceptance * normcdf(xPrevious/sqrt(proposal_variance)) ...
