@@ -7,7 +7,7 @@ settings = contents.settings;
 
 p = gcp('nocreate');
 if isempty(p)
-    parpool(7)
+    parpool()
 end
 
 parfor i = 1:length(settings)
