@@ -14,8 +14,8 @@ function [] = main(path, save_dir, dataset, visualize_flag, parameters)
 
 arguments
     path char = '~/Documents/Uni/FYRP/'
-    save_dir char = 'data/run2_debug_path-stuffs'
-    dataset string = ""
+    save_dir char = 'data/run2_debug'
+    dataset string = "assoc_recog_overall_SNR5.mat"
     visualize_flag logical = true
     parameters struct = struct
 end
@@ -23,11 +23,11 @@ end
 %% Checking validity of and setting defaults for PARAMETERS
 
 if ~isfield(parameters, 'n')
-    parameters.n = 5; % Number of bumps
+    parameters.n = 10; % Number of bumps
 end
 
 if ~isfield(parameters, 'N')
-    parameters.N = 2; % Number of subjects
+    parameters.N = 20; % Number of subjects
 end
 
 %% Loading data
@@ -140,8 +140,8 @@ for i = 1:N
     for t = 1:trial_nums(i)
         % All p_itks for a given k are relatively close right now; perhaps
         % not a fair initialisation
-%         p_itks(i, t, :) = (1:n) * (subject_lens(t) / (n + 1));
-        p_itks(i, t, :) = initializeBumpIndices(n, subject_lens(t));
+        p_itks(i, t, :) = (1:n) * (subject_lens(t) / (n + 1));
+%         p_itks(i, t, :) = initializeBumpIndices(n, subject_lens(t));
 %         p_itks(i, t, :) = all_pos(1, :);
     end
     
