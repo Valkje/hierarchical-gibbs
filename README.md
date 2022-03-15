@@ -2,6 +2,8 @@
 
 This sampler will estimate the parameter values for the hierarchy displayed in the figure below from EEG data.
 
+**Note**: If you pull this repo, then make sure to switch to the `extension` branch if you want to use this version of the code.
+
 ![parameter hierarchy](images/graphical_model_3.png)
 
 ## Requirements
