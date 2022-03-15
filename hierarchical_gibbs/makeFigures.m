@@ -6,7 +6,7 @@ clf
 cond = 1;
 
 if cond == 1
-    load('data/run2_debug_jumping_bumps_1/histograms.mat');
+    load('data/run_05bump_1000_1/histograms.mat');
 else
     load('data/run_cond2_1/histograms.mat');
 end

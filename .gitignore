@@ -1,0 +1,10 @@
+data/
+synth_data/
+analysis/
+eeglab*
+images/
+PDFs/
+Presentations/
+Graphical\ models/
+papers/
+.Rhistory

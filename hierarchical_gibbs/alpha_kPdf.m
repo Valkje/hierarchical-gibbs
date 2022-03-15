@@ -1,6 +1,7 @@
 function density = alpha_kPdf(alpha_k, c_k, d_k, e_k, sigma2_iks, beta_k, product)
-%ALPHA_KPDF Summary of this function goes here
-%   Detailed explanation goes here
+%ALPHA_KPDF Gives the probability density of alpha_k.
+%   Gives the probability density of alpha_k given its parameters. See the
+%   appendix of the report to see why the density is calculated this way.
     arguments
         alpha_k double
         c_k double

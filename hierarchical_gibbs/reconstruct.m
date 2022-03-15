@@ -1,4 +1,6 @@
 function electrodes = reconstruct(factors,coeff,latent,means)
+%RECONSTRUCT Converts principal components back to a (milli?)volts-based
+%EEG topology.
 % @ factors: bump magnitudes [nPC x nBumps]
 % @ coeff: PCA coeficients [ch x ch] loadings
 % @ latent: PCA eiginevalues of the covariance matrix of data [ch x 1]
