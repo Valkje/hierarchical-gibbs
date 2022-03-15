@@ -1,0 +1,64 @@
+{
+    "settings": [
+        {
+            "path": "~/Documents/Uni/FYRP/",
+            "save_dir": "data/run_01bump",
+            "dataset": "",
+            "visualize_flag": false,
+            "parameters": {
+                "n": 1,
+                "N": 20
+            }
+        },
+        {
+            "path": "~/Documents/Uni/FYRP/",
+            "save_dir": "data/run_02bump",
+            "dataset": "",
+            "visualize_flag": false,
+            "parameters": {
+                "n": 2,
+                "N": 20
+            }
+        },
+        {
+            "path": "~/Documents/Uni/FYRP/",
+            "save_dir": "data/run_03bump",
+            "dataset": "",
+            "visualize_flag": false,
+            "parameters": {
+                "n": 3,
+                "N": 20
+            }
+        },
+        {
+            "path": "~/Documents/Uni/FYRP/",
+            "save_dir": "data/run_08bump",
+            "dataset": "",
+            "visualize_flag": false,
+            "parameters": {
+                "n": 8,
+                "N": 20
+            }
+        },
+        {
+            "path": "~/Documents/Uni/FYRP/",
+            "save_dir": "data/run_09bump",
+            "dataset": "",
+            "visualize_flag": false,
+            "parameters": {
+                "n": 9,
+                "N": 20
+            }
+        },
+        {
+            "path": "~/Documents/Uni/FYRP/",
+            "save_dir": "data/run_10bump",
+            "dataset": "",
+            "visualize_flag": false,
+            "parameters": {
+                "n": 10,
+                "N": 20
+            }
+        }
+    ]
+}
