@@ -67,7 +67,7 @@ load chanlocs.mat chanlocs
 % synthetic dataset.
 if ~(dataset == "")
     load(dataset, 'all_x', 'all_y', 'all_subjects', 'all_conds', ... 
-        'all_signal', 'all_pos')
+        'all_signal')
     
     x = all_x;
     y = all_y;
