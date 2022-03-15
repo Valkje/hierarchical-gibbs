@@ -2,6 +2,8 @@
 
 This sampler will estimate the parameter values for the hierarchy displayed in the figure below from EEG data.
 
+**Note**: The extended version can be found [here](https://github.com/Valkje/hierarchical-gibbs/tree/extension). Also make sure to switch to the `extension` branch if you pull this repo and want to use the extended code.
+
 ![parameter hierarchy](graphical_model_2.png)
 
 ## Requirements
